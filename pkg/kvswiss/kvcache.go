@@ -1,4 +1,4 @@
-package kvsharded
+package kvswiss
 
 import (
 	"time"
@@ -13,13 +13,13 @@ type Cache[K comparable, V any] struct {
 	OnDelete func(K, V) //function that's called when cached item is deleted automatically
 }
 
-func New[K comparable, V any](ex time.Duration) *Cache[K, V] {
+func New[K comparable, V any](ex time.Duration, sz uint32) *Cache[K, V] {
 	cache := Cache[K, V] {}
 	cache.shards = make([]*shardMap[K, V], defaultShardCount)
 	cache.OnDelete = func(K, V){}
 
 	for i := 0; i < defaultShardCount; i++ {
-		cache.shards[i] = newShardMap[K, V](ex)
+		cache.shards[i] = newShardMap[K, V](ex, sz)
 	}
 
 	return &cache

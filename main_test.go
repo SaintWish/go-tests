@@ -45,6 +45,14 @@ func Benchmark_KVSharded(b *testing.B) {
 	}
 }
 
+func Benchmark_KVSwiss_SZ1000(b *testing.B) {
+	runtime.GC()
+
+	for i := 0; i < b.N; i++ {
+		KVSwiss_RW()
+	}
+}
+
 func Benchmark_HexMap(b *testing.B) {
 	runtime.GC()
 
@@ -77,7 +85,7 @@ func Benchmark_HashMap(b *testing.B) {
 	}
 }
 
-func Benchmark_SwissMap(b *testing.B) {
+func Benchmark_SwissMap_SZ1000(b *testing.B) {
 	runtime.GC()
 
 	for i := 0; i < b.N; i++ {
@@ -85,7 +93,7 @@ func Benchmark_SwissMap(b *testing.B) {
 	}
 }
 
-func Benchmark_CSSwissMap(b *testing.B) {
+func Benchmark_CSSwissMap_SZ1000(b *testing.B) {
 	runtime.GC()
 
 	for i := 0; i < b.N; i++ {

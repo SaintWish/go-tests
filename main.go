@@ -9,6 +9,7 @@ import (
 	"github.com/SaintWish/go-tests/pkg/kvcache"
 	"github.com/SaintWish/go-tests/pkg/kvbyte"
 	"github.com/SaintWish/go-tests/pkg/kvsharded"
+	"github.com/SaintWish/go-tests/pkg/kvswiss"
 	"github.com/alphadose/haxmap"
 	"github.com/lrita/cmap"
 	ccmap "github.com/orcaman/concurrent-map/v2"
@@ -21,16 +22,17 @@ import (
 
 const maxEntries = 500
 
-type test struct {}
+type blank2 struct {}
 
 type blank struct {
-	name test
+	test int
+	test2 blank2
 }
 
 func Map_RW() {
 	m := map[int]blank{}
 	for i := 1; i <= maxEntries; i++ {
-		m[i] = blank{test{}}
+		m[i] = blank{test: i, test2: blank2{}}
 	}
 
 	for i := 1; i <= maxEntries; i++ {
@@ -41,7 +43,7 @@ func Map_RW() {
 func SyncMap_RW() {
 	var m sync.Map
 	for i := 1; i <= maxEntries; i++ {
-		m.Store(i, blank{test{}})
+		m.Store(i, blank{test: i, test2: blank2{}})
 	}
 
 	for i := 1; i <= maxEntries; i++ {
@@ -52,7 +54,7 @@ func SyncMap_RW() {
 func KVCache_RW() {
 	c := kvcache.New[int, blank](0)
 	for i := 1; i <= maxEntries; i++ {
-		c.Set(i, blank{test{}})
+		c.Set(i, blank{test: i, test2: blank2{}})
 	}
 
 	for i := 1; i <= maxEntries; i++ {
@@ -63,7 +65,7 @@ func KVCache_RW() {
 func KVByte_RW() {
 	c := kvbyte.New[int](0)
 	for i := 1; i <= maxEntries; i++ {
-		enc, _ := binary.Marshal(blank{test{}})
+		enc, _ := binary.Marshal(blank{test: i, test2: blank2{}})
 		c.Set(i, enc)
 	}
 
@@ -75,18 +77,31 @@ func KVByte_RW() {
 func KVSharded_RW() {
 	c := kvsharded.New[int, blank](0)
 	for i := 1; i <= maxEntries; i++ {
-		c.Set(i, blank{test{}})
+		c.Set(i, blank{test: i, test2: blank2{}})
 	}
 
 	for i := 1; i <= maxEntries; i++ {
 		c.Get(i)
+		//fmt.Println(res)
+	}
+}
+
+func KVSwiss_RW() {
+	c := kvswiss.New[int, blank](0, 1000)
+	for i := 1; i <= maxEntries; i++ {
+		c.Set(i, blank{test: i, test2: blank2{}})
+	}
+
+	for i := 1; i <= maxEntries; i++ {
+		c.Get(i)
+		//fmt.Println(res)
 	}
 }
 
 func HexMap_RW() {
 	m := haxmap.New[int, blank]()
 	for i := 1; i <= maxEntries; i++ {
-		m.Set(i, blank{test{}})
+		m.Set(i, blank{test: i, test2: blank2{}})
 	}
 
 	for i := 1; i <= maxEntries; i++ {
@@ -97,7 +112,7 @@ func HexMap_RW() {
 func CMap_RW() {
 	var m cmap.Cmap
 	for i := 1; i <= maxEntries; i++ {
-		m.Store(i, blank{test{}})
+		m.Store(i, blank{test: i, test2: blank2{}})
 	}
 
 	for i := 1; i <= maxEntries; i++ {
@@ -109,7 +124,7 @@ func CCMap_RW() {
 	m := ccmap.New[blank]()
 	for i := 1; i <= maxEntries; i++ {
 		stri := strconv.Itoa(i)
-		m.Set(stri, blank{test{}})
+		m.Set(stri, blank{test: i, test2: blank2{}})
 	}
 
 	for i := 1; i <= maxEntries; i++ {
@@ -121,7 +136,7 @@ func CCMap_RW() {
 func HashMap_RW() {
 	m := hashmap.New[int, blank]()
 	for i := 1; i <= maxEntries; i++ {
-		m.Set(i, blank{test{}})
+		m.Set(i, blank{test: i, test2: blank2{}})
 	}
 
 	for i := 1; i <= maxEntries; i++ {
@@ -130,9 +145,9 @@ func HashMap_RW() {
 }
 
 func Swiss_RW() {
-	m := swiss.NewMap[int, blank](100)
+	m := swiss.NewMap[int, blank](1000)
 	for i := 1; i <= maxEntries; i++ {
-		m.Put(i, blank{test{}})
+		m.Put(i, blank{test: i, test2: blank2{}})
 	}
 
 	for i := 1; i <= maxEntries; i++ {
@@ -142,10 +157,11 @@ func Swiss_RW() {
 
 func CSSwiss_RW() {
 	m := csmap.Create[int, blank](
-		csmap.WithSize[int, blank](100),
+		csmap.WithShardCount[int, blank](16),
+		csmap.WithSize[int, blank](1000),
 	)
 	for i := 1; i <= maxEntries; i++ {
-		m.Store(i, blank{test{}})
+		m.Store(i, blank{test: i, test2: blank2{}})
 	}
 
 	for i := 1; i <= maxEntries; i++ {
@@ -157,7 +173,7 @@ func Xsync_RW() {
 	m := xsync.NewMap()
 	for i := 1; i <= maxEntries; i++ {
 		stri := strconv.Itoa(i)
-		m.Store(stri, blank{test{}})
+		m.Store(stri, blank{test: i, test2: blank2{}})
 	}
 
 	for i := 1; i <= maxEntries; i++ {
