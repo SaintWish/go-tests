@@ -1,4 +1,4 @@
-# Non-Concurrent Map Tests
+# Non-Concurrent RW Map Tests
 ```
 goos: windows
 goarch: amd64
