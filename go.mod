@@ -13,4 +13,7 @@ require (
 	github.com/puzpuzpuz/xsync/v2 v2.5.0
 )
 
-require golang.org/x/exp v0.0.0-20221031165847-c99f073a8326 // indirect
+require (
+	github.com/OneOfOne/cmap v0.0.0-20170825200327-ccaef7657ab8 // indirect
+	golang.org/x/exp v0.0.0-20221031165847-c99f073a8326 // indirect
+)

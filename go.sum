@@ -1,3 +1,5 @@
+github.com/OneOfOne/cmap v0.0.0-20170825200327-ccaef7657ab8 h1:LvJrjPfvQXehyO8Vs6HK2X1jbL+8cKA5R84gj8+IIi0=
+github.com/OneOfOne/cmap v0.0.0-20170825200327-ccaef7657ab8/go.mod h1:jQmVrGXGFu7sbAteKCQgJWfTJbEHUaxGw4EKV0AQxIU=
 github.com/alphadose/haxmap v1.3.0 h1:C/2LboOnPCZP27GmmSXOcwx360st0P8N0fTJ3voefKc=
 github.com/alphadose/haxmap v1.3.0/go.mod h1:rjHw1IAqbxm0S3U5tD16GoKsiAd8FWx5BJ2IYqXwgmM=
 github.com/cornelk/hashmap v1.0.8 h1:nv0AWgw02n+iDcawr5It4CjQIAcdMMKRrs10HOJYlrc=

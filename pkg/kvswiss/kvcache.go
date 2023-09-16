@@ -3,7 +3,7 @@ package kvswiss
 import (
 	"time"
 	
-	"github.com/dolthub/maphash"
+	"github.com/saintwish/go-tests/pkg/kvswiss/maphash"
 )
 
 const defaultShardCount = 32
