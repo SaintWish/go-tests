@@ -4,7 +4,8 @@ import (
 	"time"
 	"sync"
 
-	"github.com/dolthub/swiss"
+	"github.com/saintwish/go-tests/pkg/kvswiss/swiss"
+	//"github.com/dolthub/swiss"
 )
 
 type item[V any] struct {
@@ -13,20 +14,20 @@ type item[V any] struct {
 }
 
 //used internally
-type shardMap[K comparable, V any] struct {
+type shard[K comparable, V any] struct {
 	Map *swiss.Map[K, item[V]]
 	DefaultExpire int64
 	sync.RWMutex //mutex
 }
 
-func newShardMap[K comparable, V any](defaultExpire time.Duration, size uint32) *shardMap[K, V] {
-	return &shardMap[K, V] {
+func newShard[K comparable, V any](defaultExpire time.Duration, size uint32) *shard[K, V] {
+	return &shard[K, V] {
 		Map: swiss.NewMap[K, item[V]]( size/defaultShardCount ), // 
 		DefaultExpire: int64(defaultExpire),
 	}
 }
 
-func (m *shardMap[K, V]) set(key K, val V) {
+func (m *shard[K, V]) set(key K, val V) {
 	now := time.Now().UnixNano()
 	newExpire := now + m.DefaultExpire
 	itm := item[V]{
@@ -36,15 +37,15 @@ func (m *shardMap[K, V]) set(key K, val V) {
 
 	m.Lock()
 
-	m.Map.Put(key, itm)
+	m.Map.Set(key, itm)
 
 	m.Unlock()
 }
 
-func (m *shardMap[K, V]) get(key K) (V) {
+func (m *shard[K, V]) get(key K) (V) {
 	m.RLock()
 
-	val,_ := m.Map.Get(key)
+	val := m.Map.Get(key)
 
 	m.RUnlock()
 

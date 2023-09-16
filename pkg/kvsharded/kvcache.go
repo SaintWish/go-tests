@@ -6,7 +6,7 @@ import (
 	"github.com/dolthub/maphash"
 )
 
-const defaultShardCount = 16
+const defaultShardCount = 32
 
 type Cache[K comparable, V any] struct {
 	shards []*shardMap[K, V]

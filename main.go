@@ -4,12 +4,9 @@ import (
 	"sync"
 	"strconv"
 
-	"github.com/kelindar/binary"
-
-	"github.com/SaintWish/go-tests/pkg/kvcache"
-	"github.com/SaintWish/go-tests/pkg/kvbyte"
-	"github.com/SaintWish/go-tests/pkg/kvsharded"
-	"github.com/SaintWish/go-tests/pkg/kvswiss"
+	"github.com/saintwish/go-tests/pkg/kvcache"
+	"github.com/saintwish/go-tests/pkg/kvsharded"
+	"github.com/saintwish/go-tests/pkg/kvswiss"
 	"github.com/alphadose/haxmap"
 	"github.com/lrita/cmap"
 	ccmap "github.com/orcaman/concurrent-map/v2"
@@ -29,17 +26,6 @@ type blank struct {
 	test2 blank2
 }
 
-func Map_RW() {
-	m := map[int]blank{}
-	for i := 1; i <= maxEntries; i++ {
-		m[i] = blank{test: i, test2: blank2{}}
-	}
-
-	for i := 1; i <= maxEntries; i++ {
-		_ = m[i]
-	}
-}
-
 func SyncMap_RW() {
 	var m sync.Map
 	for i := 1; i <= maxEntries; i++ {
@@ -55,18 +41,6 @@ func KVCache_RW() {
 	c := kvcache.New[int, blank](0)
 	for i := 1; i <= maxEntries; i++ {
 		c.Set(i, blank{test: i, test2: blank2{}})
-	}
-
-	for i := 1; i <= maxEntries; i++ {
-		c.Get(i)
-	}
-}
-
-func KVByte_RW() {
-	c := kvbyte.New[int](0)
-	for i := 1; i <= maxEntries; i++ {
-		enc, _ := binary.Marshal(blank{test: i, test2: blank2{}})
-		c.Set(i, enc)
 	}
 
 	for i := 1; i <= maxEntries; i++ {

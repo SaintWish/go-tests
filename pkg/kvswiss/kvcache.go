@@ -6,28 +6,29 @@ import (
 	"github.com/dolthub/maphash"
 )
 
-const defaultShardCount = 16
+const defaultShardCount = 32
 
 type Cache[K comparable, V any] struct {
-	shards []*shardMap[K, V]
+	shards []*shard[K, V]
+	hash maphash.Hasher[K]
 	OnDelete func(K, V) //function that's called when cached item is deleted automatically
 }
 
 func New[K comparable, V any](ex time.Duration, sz uint32) *Cache[K, V] {
 	cache := Cache[K, V] {}
-	cache.shards = make([]*shardMap[K, V], defaultShardCount)
+	cache.shards = make([]*shard[K, V], defaultShardCount)
 	cache.OnDelete = func(K, V){}
+	cache.hash = maphash.NewHasher[K]()
 
 	for i := 0; i < defaultShardCount; i++ {
-		cache.shards[i] = newShardMap[K, V](ex, sz)
+		cache.shards[i] = newShard[K, V](ex, sz)
 	}
 
 	return &cache
 }
 
 func (c *Cache[K, V]) getShardIndex(key K) uint64 {
-	h := maphash.NewHasher[K]()
-	sum := h.Hash(key)
+	sum := c.hash.Hash(key)
 
 	return sum % defaultShardCount
 }
