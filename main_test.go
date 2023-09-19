@@ -8,6 +8,7 @@ import (
 	"github.com/saintwish/go-tests/pkg/kvcache"
 	"github.com/saintwish/go-tests/pkg/kvsharded"
 	"github.com/saintwish/go-tests/pkg/kvswiss"
+	//kvswiss "github.com/saintwish/go-tests/pkg/kvswiss2"
 	"github.com/alphadose/haxmap"
 	"github.com/cornelk/hashmap"
 	"github.com/mhmtszr/concurrent-swiss-map"
@@ -15,7 +16,7 @@ import (
 )
 
 func Benchmark_KVSwiss_SZ1024(b *testing.B) {
-	m := kvswiss.New[int, blank](0, 1024)
+	m := kvswiss.New[int, blank](0, 2048, 16)
 	s := blank{test: 1337, test2: blank2{}}
 
 	b.ResetTimer()
@@ -31,7 +32,7 @@ func Benchmark_KVSwiss_SZ1024(b *testing.B) {
 }
 
 func Benchmark_KVSwiss_Parallel(b *testing.B) {
-	m := kvswiss.New[int, blank](0, 1024)
+	m := kvswiss.New[int, blank](0, 2048, 128)
 	s := blank{test: 1337, test2: blank2{}}
 
 	b.ResetTimer()
