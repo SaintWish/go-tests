@@ -1,4 +1,6 @@
-# Non-Concurrent RW Map Tests
+# RW Map Tests with and without parallel
+``go test -bench . -benchmem``
+
 ```
 goos: windows
 goarch: amd64
