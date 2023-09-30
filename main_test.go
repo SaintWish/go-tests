@@ -1,22 +1,22 @@
 package main
 
 import (
+	//"time"
     "testing"
-
 	"sync"
 
 	"github.com/saintwish/go-tests/pkg/kvcache"
 	"github.com/saintwish/go-tests/pkg/kvsharded"
 	"github.com/saintwish/go-tests/pkg/kvswiss"
-	//kvswiss "github.com/saintwish/go-tests/pkg/kvswiss2"
+	"github.com/saintwish/go-tests/pkg/kvswiss2"
 	"github.com/alphadose/haxmap"
 	"github.com/cornelk/hashmap"
 	"github.com/mhmtszr/concurrent-swiss-map"
 	"github.com/OneOfOne/cmap"
 )
 
-func Benchmark_KVSwiss_SZ1024(b *testing.B) {
-	m := kvswiss.New[int, blank](0, 2048, 16)
+func Benchmark_KVSwiss_SZ2048(b *testing.B) {
+	m := kvswiss.New[int, blank](0, 2048, 8)
 	s := blank{test: 1337, test2: blank2{}}
 
 	b.ResetTimer()
@@ -32,7 +32,41 @@ func Benchmark_KVSwiss_SZ1024(b *testing.B) {
 }
 
 func Benchmark_KVSwiss_Parallel(b *testing.B) {
-	m := kvswiss.New[int, blank](0, 2048, 128)
+	m := kvswiss.New[int, blank](0, 2048, 8)
+	s := blank{test: 1337, test2: blank2{}}
+
+	b.ResetTimer()
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			for e := 1; e <= maxEntries; e++ {
+				m.Set(e, s)
+			}
+	
+			for e := 1; e <= maxEntries; e++ {
+				m.Get(e)
+			}
+		}
+	})
+}
+
+func Benchmark_KVSwiss2_SZ2048(b *testing.B) {
+	m := kvswiss2.New[int, blank](2048, 8, true)
+	s := blank{test: 1337, test2: blank2{}}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		for e := 1; e <= maxEntries; e++ {
+			m.Set(e, s)
+		}
+
+		for e := 1; e <= maxEntries; e++ {
+			m.Get(e)
+		}
+	}
+}
+
+func Benchmark_KVSwiss2_Parallel(b *testing.B) {
+	m := kvswiss2.New[int, blank](2048, 8, true)
 	s := blank{test: 1337, test2: blank2{}}
 
 	b.ResetTimer()
@@ -185,10 +219,10 @@ func Benchmark_HashMap_Parallel(b *testing.B) {
 	})
 }
 
-func Benchmark_CSSwissMap_SZ1024(b *testing.B) {
+func Benchmark_CSSwissMap_SZ2048(b *testing.B) {
 	m := csmap.Create[int, blank](
-		csmap.WithShardCount[int, blank](32),
-		csmap.WithSize[int, blank](1024),
+		csmap.WithShardCount[int, blank](8),
+		csmap.WithSize[int, blank](2048),
 	)
 	s := blank{test: 1337, test2: blank2{}}
 
@@ -206,8 +240,8 @@ func Benchmark_CSSwissMap_SZ1024(b *testing.B) {
 
 func Benchmark_CSSwiss_Parallel(b *testing.B) {
 	m := csmap.Create[int, blank](
-		csmap.WithShardCount[int, blank](32),
-		csmap.WithSize[int, blank](1024),
+		csmap.WithShardCount[int, blank](8),
+		csmap.WithSize[int, blank](2048),
 	)
 	s := blank{test: 1337, test2: blank2{}}
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 	
-	"github.com/saintwish/go-tests/pkg/kvswiss/maphash"
+	"github.com/saintwish/go-tests/pkg/maphash"
 )
 
 type Cache[K comparable, V any] struct {
@@ -22,7 +22,7 @@ func New[K comparable, V any](ex time.Duration, sz uint64, sc uint64) *Cache[K, 
 
 	cache := Cache[K, V] {}
 	cache.shards = make([]*shard[K, V], sc)
-	cache.hash = maphash.NewHasher[K]()
+	cache.hash = maphash.NewHasher[K](0)
 	cache.shardCount = sc
 
 	for i := 0; i < int(sc); i++ {
@@ -57,6 +57,16 @@ func (c *Cache[K, V]) Get(key K) V {
 	return shard.get(key)
 }
 
+func (c *Cache[K, V]) GetHas(key K) (V, bool) {
+	shard := c.getShard(key)
+	return shard.getHas(key)
+}
+
+func (c *Cache[K, V]) Has(key K) bool {
+	shard := c.getShard(key)
+	return shard.has(key)
+}
+
 func (c *Cache[K, V]) Add(key K, val V) error {
 	shard := c.getShard(key)
 	if shard.has(key) {
@@ -77,35 +87,64 @@ func (c *Cache[K, V]) Update(key K, val V) error {
 	return nil
 }
 
-func (c *Cache[K, V]) Has(key K) bool {
-	shard := c.getShard(key)
-	return shard.has(key)
-}
-
 func (c *Cache[K, V]) Delete(key K) bool {
 	shard := c.getShard(key)
 	return shard.delete(key)
 }
 
+func (c *Cache[K, V]) ShardCount() uint64 {
+	return c.shardCount
+}
+
+func (c *Cache[K, V]) GetShardSize(key K) int {
+	shard := c.getShard(key)
+	return shard.Map.Count()
+}
+
+func (c *Cache[K, V]) GetShardMaxSize(key K) int {
+	shard := c.getShard(key)
+	return shard.Map.MaxCapacity()
+}
+
+func (c *Cache[K, V]) GetShardCapacity(key K) int {
+	shard := c.getShard(key)
+	return shard.Map.Capacity()
+}
+
 func (c *Cache[K, V]) Flush() {
 	for i := 0; i < len(c.shards); i++ {
 		shard := c.shards[i]
-
 		shard.Lock()
+		defer shard.Unlock()
 
 		shard.Map.Iter(func(key K, val item[V]) (stop bool) {
 			c.OnEvicted(key, val.Object)
-			shard.delete(key)
+			shard.Map.Delete(key)
 			
 			if stop {
-				shard.Unlock()
 				return
 			}
 
 			return
 		})
+	}
+}
 
-		shard.Unlock()
+func (c *Cache[K, V]) ForEach(f func(key K, val item[V])) {
+	for i := 0; i < len(c.shards); i++ {
+		shard := c.shards[i]
+		shard.Lock()
+		defer shard.Unlock()
+
+		shard.Map.Iter(func(key K, val item[V]) (stop bool) {
+			f(key, val)
+
+			if stop {
+				return
+			}
+
+			return
+		})
 	}
 }
 
@@ -120,79 +159,3 @@ func (c *Cache[K,V]) IsExpired(key K) bool {
 	shard := c.getShard(key)
 	return shard.isExpired(key)
 }
-/*
-func (c *Cache[K, V]) KeyExists(key K) bool {
-	c.mu.RLock()
-
-	if _, ok := c.Data[key]; ok {
-		c.mu.RUnlock()
-		return true
-	}
-
-	c.mu.RUnlock()
-	return false
-}
-
-func (c *Cache[K, V]) OnDeleteFunc(f func(K, V)) {
-	c.OnDelete = f
-}
-
-func (c *Cache[K, V]) Add(key K, val V) error {
-	if c.KeyExists(key) {
-		return fmt.Errorf("kvcache: Data already exists with given key %T", key)
-	}
-	
-	c.Set(key, val)
-
-	return nil
-}
-
-func (c *Cache[K, V]) Update(key K, val V) error {
-	if !c.KeyExists(key) {
-		return fmt.Errorf("kvcache: Data doesn't exists with given key %T", key)
-	}
-
-	c.Set(key, val)
-
-	return nil
-}
-
-func (c *Cache[K, V]) Delete(key K) {
-	if c.KeyExists(key) {
-		delete(c.Data, key)
-	}
-}
-
-func (c *Cache[K, V]) IsExpired(key K) bool {
-	now := time.Now().UnixNano()
-	
-	c.mu.RLock()
-	if val, ok := c.Data[key]; ok {
-		c.mu.RUnlock()
-		if val.Expire > 0 && now > val.Expire {
-			return true
-		}else{
-			return false
-		}
-	}
-
-	c.mu.RUnlock()
-	return false
-}
-
-func (c *Cache[K, V]) DeleteExpired() {
-	for k,v := range c.Data {
-		if c.IsExpired(k) {
-			c.OnDelete(k, v.Object)
-			delete(c.Data, k)
-		}
-	}
-}
-
-func (c *Cache[K, V]) Flush() {
-	for k,v := range c.Data {
-		c.OnDelete(k, v.Object)
-		delete(c.Data, k)
-	}
-}
-*/

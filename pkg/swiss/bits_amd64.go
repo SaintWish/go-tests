@@ -13,46 +13,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build !amd64 || nosimd
+//go:build amd64 && !nosimd
 
 package swiss
 
 import (
 	"math/bits"
-	"unsafe"
+	_ "unsafe"
+
+	"github.com/saintwish/go-tests/pkg/swiss/simd"
 )
 
 const (
-	groupSize       = 8
-	maxAvgGroupLoad = 7
-
-	loBits uint64 = 0x0101010101010101
-	hiBits uint64 = 0x8080808080808080
+	groupSize       = 16
+	maxAvgGroupLoad = 14
 )
 
-type bitset uint64
+type bitset uint16
 
 func metaMatchH2(m *metadata, h h2) bitset {
-	// https://graphics.stanford.edu/~seander/bithacks.html##ValueInWord
-	return hasZeroByte(castUint64(m) ^ (loBits * uint64(h)))
+	b := simd.MatchMetadata((*[16]int8)(m), int8(h))
+	return bitset(b)
 }
 
 func metaMatchEmpty(m *metadata) bitset {
-	return hasZeroByte(castUint64(m) ^ hiBits)
+	b := simd.MatchMetadata((*[16]int8)(m), empty)
+	return bitset(b)
 }
 
-func nextMatch(b *bitset) uint32 {
-	s := uint32(bits.TrailingZeros64(uint64(*b)))
+func nextMatch(b *bitset) (s uint32) {
+	s = uint32(bits.TrailingZeros16(uint16(*b)))
 	*b &= ^(1 << s) // clear bit |s|
-	return s >> 3   // div by 8
-}
-
-func hasZeroByte(x uint64) bitset {
-	return bitset(((x - loBits) & ^(x)) & hiBits)
-}
-
-func castUint64(m *metadata) uint64 {
-	return *(*uint64)((unsafe.Pointer)(m))
+	return
 }
 
 //go:linkname fastrand runtime.fastrand

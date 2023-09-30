@@ -16,7 +16,7 @@
 package swiss
 
 import (
-	"github.com/saintwish/go-tests/pkg/kvswiss/maphash"
+	"github.com/saintwish/go-tests/pkg/maphash"
 )
 
 const (
@@ -64,7 +64,7 @@ func NewMap[K comparable, V any](sz uint32) (m *Map[K, V]) {
 	m = &Map[K, V]{
 		ctrl:   make([]metadata, groups),
 		groups: make([]group[K, V], groups),
-		hash:   maphash.NewHasher[K](),
+		hash:   maphash.NewHasher[K](0),
 		limit:  groups * maxAvgGroupLoad,
 	}
 	for i := range m.ctrl {
@@ -188,8 +188,8 @@ func (m *Map[K, V]) Set(key K, value V) {
 	}
 }
 
-// Delete attempts to remove |key|, returns true successful.
-func (m *Map[K, V]) Delete(key K) (ok bool) {
+// Delete attempts to remove |key|, returns true successful and the item.
+func (m *Map[K, V]) Delete(key K) (ok bool, val V) {
 	hi, lo := splitHash(m.hash.Hash(key))
 	g := probeStart(hi, len(m.groups))
 	for {
@@ -197,7 +197,7 @@ func (m *Map[K, V]) Delete(key K) (ok bool) {
 		for matches != 0 {
 			s := nextMatch(&matches)
 			if key == m.groups[g].keys[s] {
-				ok = true
+				ok, val = true, m.groups[g].values[s]
 				// optimization: if |m.ctrl[g]| contains any empty
 				// metadata bytes, we can physically delete |key|
 				// rather than placing a tombstone.
@@ -223,7 +223,8 @@ func (m *Map[K, V]) Delete(key K) (ok bool) {
 		// stop probing if we see an empty slot
 		matches = metaMatchEmpty(&m.ctrl[g])
 		if matches != 0 { // |key| absent
-			ok = false
+			var v V
+			ok,val = false, v
 			return
 		}
 		g += 1 // linear probing
@@ -289,6 +290,12 @@ func (m *Map[K, V]) Count() int {
 // the can be added to the Map before resizing.
 func (m *Map[K, V]) Capacity() int {
 	return int(m.limit - m.resident)
+}
+
+// MaxCapacity returns max number elements
+// that can be added to the Map before resizing.
+func (m *Map[K, V]) MaxCapacity() int {
+	return int(m.limit)
 }
 
 // find returns the location of |key| if present, or its insertion location if absent.

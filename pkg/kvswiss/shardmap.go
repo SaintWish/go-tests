@@ -4,7 +4,7 @@ import (
 	"time"
 	"sync"
 
-	"github.com/saintwish/go-tests/pkg/kvswiss/swiss"
+	"github.com/saintwish/go-tests/pkg/swiss"
 	//"github.com/dolthub/swiss"
 )
 
@@ -27,7 +27,10 @@ func newShard[K comparable, V any](ex time.Duration, size uint64, count uint64) 
 	}
 }
 
-func (m *shard[K, V]) getRaw(key K) (item[V]) {
+/*--------
+	Raw get functions.
+----------*/
+func (m *shard[K, V]) rawGet(key K) (item[V]) {
 	m.RLock()
 
 	val := m.Map.Get(key)
@@ -37,17 +40,7 @@ func (m *shard[K, V]) getRaw(key K) (item[V]) {
 	return val
 }
 
-func (m *shard[K, V]) getHasRaw(key K) (item[V], bool) {
-	m.RLock()
-
-	val, ok := m.Map.GetHas(key)
-
-	m.RUnlock()
-
-	return val, ok
-}
-
-func (m *shard[K, V]) hasRaw(key K) bool {
+func (m *shard[K, V]) rawHas(key K) bool {
 	m.RLock()
 
 	ok := m.Map.Has(key)
@@ -57,47 +50,21 @@ func (m *shard[K, V]) hasRaw(key K) bool {
 	return ok
 }
 
-func (m *shard[K, V]) set(key K, val V) {
-	expire := time.Now().Add(m.Expiration)
+func (m *shard[K, V]) rawGetHas(key K) (item[V], bool) {
+	m.RLock()
 
-	itm := item[V]{
-		Object: val,
-		Expire: expire.UnixNano(),
-	}
+	val, ok := m.Map.GetHas(key)
 
-	m.Lock()
+	m.RUnlock()
 
-	m.Map.Set(key, itm)
-
-	m.Unlock()
+	return val, ok
 }
 
-func (m *shard[K, V]) get(key K) V {
-	now := time.Now().UnixNano()
-
-	if v, ok := m.getHasRaw(key); ok && v.Expire == 0 || now < v.Expire {
-		m.renew(key)
-		return v.Object
-	}
-
-	var res V
-	return res
-}
-
-func (m *shard[K, V]) getHas(key K) (V, bool) {
-	now := time.Now().UnixNano()
-
-	if v, ok := m.getHasRaw(key); ok && v.Expire == 0 || now < v.Expire {
-		m.renew(key)
-		return v.Object, true
-	}
-
-	var res V
-	return res, false
-}
-
+/*--------
+	Get functions that take expiration into account and update expiration.
+----------*/
 func (m *shard[K, V]) has(key K) bool {
-	v, ok := m.getHasRaw(key)
+	v, ok := m.rawGetHas(key)
 	now := time.Now().UnixNano()
 
 	if ok && v.Expire == 0 || now < v.Expire {
@@ -107,10 +74,57 @@ func (m *shard[K, V]) has(key K) bool {
 	return false
 }
 
+func (m *shard[K, V]) getHas(key K) (V, bool) {
+	now := time.Now().UnixNano()
+
+	if v, ok := m.rawGetHas(key); ok && v.Expire == 0 || now < v.Expire {
+		m.renew(key)
+		return v.Object, true
+	}
+
+	var res V
+	return res, false
+}
+
+func (m *shard[K, V]) get(key K) V {
+	now := time.Now().UnixNano()
+	
+	if v, ok := m.rawGetHas(key); ok && v.Expire == 0 || now < v.Expire {
+		m.renew(key)
+		return v.Object
+	}
+
+	var res V
+	return res
+}
+
+/*--------
+	Other functions
+----------*/
+func (m *shard[K, V]) set(key K, val V) {
+	var expire int64
+	if m.Expiration == 0 {
+		expire = 0
+	}else{
+		expire = time.Now().Add(m.Expiration).UnixNano()
+	}
+
+	itm := item[V]{
+		Object: val,
+		Expire: expire,
+	}
+
+	m.Lock()
+
+	m.Map.Set(key, itm)
+
+	m.Unlock()
+}
+
 func (m *shard[K, V]) delete(key K) bool {
 	m.Lock()
 
-	ok := m.Map.Delete(key)
+	ok, _ := m.Map.Delete(key)
 
 	m.Unlock()
 
@@ -145,7 +159,7 @@ func (m *shard[K, V]) evictItem(key K, cb func(K,V)) bool {
 	if v, ok := m.Map.GetHas(key); ok {
 		if v.Expire > 0 && now > v.Expire {
 			val = v.Object
-			res = m.Map.Delete(key)
+			res,_ = m.Map.Delete(key)
 		}
 	}else{
 		m.Unlock()

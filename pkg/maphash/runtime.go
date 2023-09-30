@@ -32,7 +32,7 @@ import (
 
 type hashfn func(unsafe.Pointer, uintptr) uintptr
 
-func getRuntimeHasher[K comparable]() (h hashfn) {
+func getDefaultHasher[K comparable]() (h hashfn) {
 	a := any(make(map[K]struct{}))
 	i := (*mapiface)(unsafe.Pointer(&a))
 	h = i.typ.hasher

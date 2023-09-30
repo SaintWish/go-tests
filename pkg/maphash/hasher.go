@@ -15,22 +15,31 @@
 
 package maphash
 
-//import "unsafe"
+import (
+	"unsafe"
+)
 
 // Hasher hashes values of type K.
 // Uses runtime AES-based hashing.
 type Hasher[K comparable] struct {
-	hash func(key K) uintptr //hashfn
+	//hash func(key K) uintptr //hashfn
+	hash hashfn
 	seed uintptr
+	typ int8
 }
 
 // NewHasher creates a new Hasher[K] with a random seed.
-func NewHasher[K comparable]() Hasher[K] {
-	h := Hasher[K]{
-		//hash: getRuntimeHasher[K](),
-		hash: getDefaultHasher[K](),
-		seed: newHashSeed(),
+func NewHasher[K comparable](typ int8) Hasher[K] {
+	h := Hasher[K]{}
+	h.seed = newHashSeed()
+	h.typ = typ
+	switch(typ) {
+	case 0:
+		h.hash = getDefaultHasher[K]()
+	case 1:
+		h.hash = getExperimentalHasher[K]()
 	}
+
 	return h
 }
 
@@ -44,8 +53,7 @@ func NewSeed[K comparable](h Hasher[K]) Hasher[K] {
 
 // Hash hashes |key|.
 func (h Hasher[K]) Hash(key K) uint64 {
-	//return uint64(h.Hash2(key))
-	return uint64(h.hash(key))
+	return uint64(h.Hash2(key))
 }
 
 // Hash2 hashes |key| as more flexible uintptr.
@@ -53,7 +61,6 @@ func (h Hasher[K]) Hash2(key K) uintptr {
 	// promise to the compiler that pointer
 	// |p| does not escape the stack.
 
-	//p := noescape(unsafe.Pointer(&key))
-	//return h.hash(p, h.seed)
-	return h.hash(key)
+	p := noescape(unsafe.Pointer(&key))
+	return h.hash(p, h.seed)
 }
