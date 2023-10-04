@@ -1,4 +1,6 @@
-package kvswiss2
+package kv1s
+
+// A key, value resizeable cache using a modified swiss map.
 
 import (
 	"sync"

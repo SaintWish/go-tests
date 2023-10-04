@@ -320,3 +320,134 @@ func getExperimentalHasher[K comparable]() (f func(p unsafe.Pointer, seed uintpt
 
 	return f
 }
+
+// func getExperimentalHasher[K comparable]() (f func(p unsafe.Pointer, seed uintptr) uintptr) {
+// 	// default hash functions
+// 	v := *new(K)
+// 	switch v.(type) {
+// 	case string:
+// 		// use default xxHash algorithm for key of any size for golang string data type
+// 		f = func(p unsafe.Pointer, seed uintptr) uintptr {
+// 			sh := (*reflect.StringHeader)(p)
+// 			b := unsafe.Slice((*byte)(unsafe.Pointer(sh.Data)), sh.Len)
+// 			n := sh.Len
+// 			var h uint64
+
+// 			if n >= 32 {
+// 				v1 := prime1v + prime2
+// 				v2 := prime2
+// 				v3 := uint64(0)
+// 				v4 := -prime1v
+// 				for len(b) >= 32 {
+// 					v1 = round(v1, u64(b[0:8:len(b)]))
+// 					v2 = round(v2, u64(b[8:16:len(b)]))
+// 					v3 = round(v3, u64(b[16:24:len(b)]))
+// 					v4 = round(v4, u64(b[24:32:len(b)]))
+// 					b = b[32:len(b):len(b)]
+// 				}
+// 				h = rol1(v1) + rol7(v2) + rol12(v3) + rol18(v4)
+// 				h = mergeRound(h, v1)
+// 				h = mergeRound(h, v2)
+// 				h = mergeRound(h, v3)
+// 				h = mergeRound(h, v4)
+// 			} else {
+// 				h = prime5
+// 			}
+
+// 			h += uint64(n)
+
+// 			i, end := 0, len(b)
+// 			for ; i+8 <= end; i += 8 {
+// 				k1 := round(0, u64(b[i:i+8:len(b)]))
+// 				h ^= k1
+// 				h = rol27(h)*prime1 + prime4
+// 			}
+// 			if i+4 <= end {
+// 				h ^= uint64(u32(b[i:i+4:len(b)])) * prime1
+// 				h = rol23(h)*prime2 + prime3
+// 				i += 4
+// 			}
+// 			for ; i < end; i++ {
+// 				h ^= uint64(b[i]) * prime5
+// 				h = rol11(h) * prime1
+// 			}
+
+// 			h ^= h >> 33
+// 			h *= prime2
+// 			h ^= h >> 29
+// 			h *= prime3
+// 			h ^= h >> 32
+
+// 			return uintptr(h)
+// 		}
+// 	case int, uint, uintptr, unsafe.Pointer:
+// 		switch intSizeBytes {
+// 		case 2:
+// 			// word hasher
+// 			f = *(*func(unsafe.Pointer, uintptr) uintptr)(unsafe.Pointer(&wordHasher))
+// 		case 4:
+// 			// dword hasher
+// 			f = *(*func(unsafe.Pointer, uintptr) uintptr)(unsafe.Pointer(&dwordHasher))
+// 		case 8:
+// 			// qword hasher
+// 			f = *(*func(unsafe.Pointer, uintptr) uintptr)(unsafe.Pointer(&qwordHasher))
+// 		}
+// 	case int8, uint8:
+// 		// byte hasher
+// 		f = *(*func(unsafe.Pointer, uintptr) uintptr)(unsafe.Pointer(&byteHasher))
+// 	case int16, uint16:
+// 		// word hasher
+// 		f = *(*func(unsafe.Pointer, uintptr) uintptr)(unsafe.Pointer(&wordHasher))
+// 	case int32, uint32:
+// 		// dword hasher
+// 		f = *(*func(unsafe.Pointer, uintptr) uintptr)(unsafe.Pointer(&dwordHasher))
+// 	case float32:
+// 		// custom float32 dword hasher
+// 		f = *(*func(unsafe.Pointer, uintptr) uintptr)(unsafe.Pointer(&float32Hasher))
+// 	case int64, uint64:
+// 		// qword hasher
+// 		f = *(*func(unsafe.Pointer, uintptr) uintptr)(unsafe.Pointer(&qwordHasher))
+// 	case float64:
+// 		// custom float64 qword hasher
+// 		f = *(*func(unsafe.Pointer, uintptr) uintptr)(unsafe.Pointer(&float64Hasher))
+// 	case complex64:
+// 		// custom complex64 qword hasher
+// 		f = *(*func(unsafe.Pointer, uintptr) uintptr)(unsafe.Pointer(&complex64Hasher))
+// 	case complex128:
+// 		// oword hasher, key size -> 16 bytes
+// 		f = func(p unsafe.Pointer, seed uintptr) uintptr {
+// 			b := *(*[owordSize]byte)(p)
+// 			h := prime5 + 16
+
+// 			val := uint64(b[0]) | uint64(b[1])<<8 | uint64(b[2])<<16 | uint64(b[3])<<24 |
+// 				uint64(b[4])<<32 | uint64(b[5])<<40 | uint64(b[6])<<48 | uint64(b[7])<<56
+
+// 			k1 := val * prime2
+// 			k1 = bits.RotateLeft64(k1, 31)
+// 			k1 *= prime1
+
+// 			h ^= k1
+// 			h = bits.RotateLeft64(h, 27)*prime1 + prime4
+
+// 			val = uint64(b[8]) | uint64(b[9])<<8 | uint64(b[10])<<16 | uint64(b[11])<<24 |
+// 				uint64(b[12])<<32 | uint64(b[13])<<40 | uint64(b[14])<<48 | uint64(b[15])<<56
+
+// 			k1 = val * prime2
+// 			k1 = bits.RotateLeft64(k1, 31)
+// 			k1 *= prime1
+
+// 			h ^= k1
+// 			h = bits.RotateLeft64(h, 27)*prime1 + prime4
+
+// 			h ^= h >> 33
+// 			h *= prime2
+// 			h ^= h >> 29
+// 			h *= prime3
+// 			h ^= h >> 32
+
+// 			return uintptr(h)
+// 		}
+// 	}
+
+// 	return f
+// }

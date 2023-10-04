@@ -1,4 +1,4 @@
-package kvswiss
+package kv1
 
 import (
 	"time"

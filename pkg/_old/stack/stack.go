@@ -1,6 +1,6 @@
 package stack
 
-//last in, first out stack
+//first in, last out stack
 
 import (
 
@@ -13,16 +13,19 @@ type Stack[V any] struct {
 
 func New[V any](sz int) *Stack[V] {
 	return &Stack[V] {
-		//stack: []V{},
-		stack: make([]V, 0, sz),
+		//stack: make([]V, sz),
+		stack: []V{},
+		//stack: make([]V, 0, sz),
 	}
 }
 
 //Pushed value onto the top of the stack and returns index of recently added element
 func (s *Stack[V]) Push(val V) (index int) {
 	s.stack = append(s.stack, val)
+	copy(s.stack[1:], s.stack)
+	s.stack[0] = val
 	s.size++
-	index = s.size-1
+	index = 0
 	return
 }
 
@@ -48,7 +51,7 @@ func (s *Stack[V]) FrontIndex() (int) {
 
 //Remove from the bottom of the stack. Returns index of element that was removed.
 func (s *Stack[V]) Pop() (index int, val V) {
-	if s.size == 0 {
+	if len(s.stack) == 0 {
 		index = 0
 		return
 	}
@@ -65,12 +68,8 @@ func (s *Stack[V]) Remove(index int) {
 	s.size--
 }
 
-//Moves a element to the back of the stack.
-func (s *Stack[V]) MoveToBack(index int) (int) {
-	if s.size <= 1 {
-		return 0
-	}
-
+//Moves a element to the front of the stack.
+func (s *Stack[V]) MoveToFront(index int) (int) {
 	val := s.stack[index]
 	s.Remove(index)
 	return s.Push(val)

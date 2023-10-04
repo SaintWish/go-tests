@@ -2,21 +2,22 @@ package main
 
 import (
 	//"time"
+	//"fmt"
     "testing"
 	"sync"
 
 	"github.com/saintwish/go-tests/pkg/kvcache"
 	"github.com/saintwish/go-tests/pkg/kvsharded"
-	"github.com/saintwish/go-tests/pkg/kvswiss"
-	"github.com/saintwish/go-tests/pkg/kvswiss2"
+	"github.com/saintwish/go-tests/pkg/kv1"
+	"github.com/saintwish/go-tests/pkg/kv2"
 	"github.com/alphadose/haxmap"
 	"github.com/cornelk/hashmap"
 	"github.com/mhmtszr/concurrent-swiss-map"
 	"github.com/OneOfOne/cmap"
 )
 
-func Benchmark_KVSwiss_SZ2048(b *testing.B) {
-	m := kvswiss.New[int, blank](0, 2048, 8)
+func Benchmark_KV1_SZ2048(b *testing.B) {
+	m := kv1.New[int, blank](0, 2048, 8)
 	s := blank{test: 1337, test2: blank2{}}
 
 	b.ResetTimer()
@@ -31,8 +32,8 @@ func Benchmark_KVSwiss_SZ2048(b *testing.B) {
 	}
 }
 
-func Benchmark_KVSwiss_Parallel(b *testing.B) {
-	m := kvswiss.New[int, blank](0, 2048, 8)
+func Benchmark_KV1_Parallel(b *testing.B) {
+	m := kv1.New[int, blank](0, 2048, 8)
 	s := blank{test: 1337, test2: blank2{}}
 
 	b.ResetTimer()
@@ -49,8 +50,8 @@ func Benchmark_KVSwiss_Parallel(b *testing.B) {
 	})
 }
 
-func Benchmark_KVSwiss2_SZ2048(b *testing.B) {
-	m := kvswiss2.New[int, blank](2048, 8, true)
+func Benchmark_KV2_SZ2048(b *testing.B) {
+	m := kv2.New[int, blank](2048, 8)
 	s := blank{test: 1337, test2: blank2{}}
 
 	b.ResetTimer()
@@ -65,8 +66,8 @@ func Benchmark_KVSwiss2_SZ2048(b *testing.B) {
 	}
 }
 
-func Benchmark_KVSwiss2_Parallel(b *testing.B) {
-	m := kvswiss2.New[int, blank](2048, 8, true)
+func Benchmark_KV2_Parallel(b *testing.B) {
+	m := kv2.New[int, blank](2048, 8)
 	s := blank{test: 1337, test2: blank2{}}
 
 	b.ResetTimer()

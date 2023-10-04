@@ -6,19 +6,22 @@ goos: windows
 goarch: amd64
 pkg: github.com/SaintWish/go-tests
 cpu: Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz
-Benchmark_SyncMap-8                        15607             74897 ns/op           17964 B/op       1245 allocs/op
-Benchmark_SyncMap_Parallel-8               49034             22839 ns/op           17962 B/op       1245 allocs/op
-Benchmark_KVCache-8                        34791             33096 ns/op               2 B/op          0 allocs/op
-Benchmark_KVCache_Parallel-8                4298            295938 ns/op              19 B/op          0 allocs/op
-Benchmark_KVSharded-8                      16153             74316 ns/op             163 B/op          0 allocs/op
-Benchmark_KVSharded_Parallel-8             24807             47527 ns/op             105 B/op          0 allocs/op
-Benchmark_KVSwiss_SZ1024-8                 26041             46283 ns/op               0 B/op          0 allocs/op
-Benchmark_KVSwiss_Parallel-8               16114             72674 ns/op               0 B/op          0 allocs/op
-Benchmark_HexMap-8                         33799             35780 ns/op            8001 B/op        500 allocs/op
-Benchmark_HexMap_Parallel-8                95028             11006 ns/op            8000 B/op        500 allocs/op
-Benchmark_CMap-8                           15470             78254 ns/op            9964 B/op        745 allocs/op
-Benchmark_CCMap_StringKeys-8               15732             76208 ns/op            2570 B/op        802 allocs/op
-Benchmark_HashMap-8                        35866             33625 ns/op            8001 B/op        500 allocs/op
-Benchmark_CSSwissMap_SZ1024-8              22468             52250 ns/op               0 B/op          0 allocs/op
-Benchmark_CSSwiss_Parallel-8               22322             52459 ns/op               0 B/op          0 allocs/op
+Benchmark_KV1_SZ2048-8                     14672             81210 ns/op               0 B/op          0 allocs/op
+Benchmark_KV1_Parallel-8                    9222            126015 ns/op               0 B/op          0 allocs/op
+Benchmark_KV2_SZ2048-8                     27018             44900 ns/op               0 B/op          0 allocs/op
+Benchmark_KV2_Parallel-8                   13981             84153 ns/op               0 B/op          0 allocs/op
+Benchmark_KVCache-8                        34081             35274 ns/op               2 B/op          0 allocs/op
+Benchmark_KVCache_Parallel-8                3760            289953 ns/op              22 B/op          0 allocs/op
+Benchmark_KVSharded-8                      15558             75821 ns/op             168 B/op          0 allocs/op
+Benchmark_KVSharded_Parallel-8             24962             47350 ns/op             105 B/op          0 allocs/op
+Benchmark_HexMap-8                         33608             36057 ns/op            8001 B/op        500 allocs/op
+Benchmark_HexMap_Parallel-8                96646             11013 ns/op            8000 B/op        500 allocs/op
+Benchmark_HashMap-8                        35296             34464 ns/op            8001 B/op        500 allocs/op
+Benchmark_HashMap_Parallel-8              110504             10276 ns/op            8001 B/op        500 allocs/op
+Benchmark_CSSwissMap_SZ2048-8              26170             46506 ns/op               0 B/op          0 allocs/op
+Benchmark_CSSwiss_Parallel-8                9256            109072 ns/op               0 B/op          0 allocs/op
+Benchmark_CMap-8                           13874             80982 ns/op           11920 B/op        990 allocs/op
+Benchmark_CMap_Parallel-8                  42355             28221 ns/op           11920 B/op        990 allocs/op
+Benchmark_SyncMap-8                        14930             78821 ns/op           17964 B/op       1245 allocs/op
+Benchmark_SyncMap_Parallel-8               47764             23013 ns/op           17962 B/op       1245 allocs/op
 ```
